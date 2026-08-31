@@ -1,0 +1,6 @@
+{
+  "name": "Cafetería Guarincito",
+  "description": "Sistema de visualización y control de confirmación de subsidiados de alimentación con sincronización de Google Forms, Google Sheets e iVMS-4200.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

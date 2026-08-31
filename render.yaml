@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: cafeteria-guarincito
+    runtime: node
+    region: oregon
+    plan: free
+    buildCommand: npm install && ng build --configuration production
+    startCommand: node dist/app/server/server.mjs
+    envVars:
+      - key: NODE_ENV
+        value: production
