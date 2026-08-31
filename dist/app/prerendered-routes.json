@@ -1,0 +1,9 @@
+{
+  "routes": {
+    "/": {},
+    "/beneficiarios": {},
+    "/confirmados": {},
+    "/entregas": {},
+    "/google-forms": {}
+  }
+}
