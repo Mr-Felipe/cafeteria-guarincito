@@ -130,7 +130,7 @@ import { ModalPlanilla } from '../../components/modal-planilla/modal-planilla';
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Confirmaciones Válidas</h3>
-                  <span class="px-2.5 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-bold">{{ cafeteria.confirmadosValidos().length }}</span>
+                  <span class="px-2.5 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-bold">{{ confirmadosValidosFiltrados().length }}</span>
                 </div>
                 <p class="text-xs text-slate-500">Estudiantes verificados en el padrón, pendientes de entrega</p>
               </div>
@@ -205,7 +205,7 @@ import { ModalPlanilla } from '../../components/modal-planilla/modal-planilla';
               <div>
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Confirmaciones Externas</h3>
-                  <span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">{{ cafeteria.confirmadosExtranos().length }}</span>
+                  <span class="px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">{{ confirmadosExtranosFiltrados().length }}</span>
                 </div>
                 <p class="text-xs text-slate-500">Su código no figura en el padrón o la carrera no coincide</p>
               </div>

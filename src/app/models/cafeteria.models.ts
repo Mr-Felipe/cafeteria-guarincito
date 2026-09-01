@@ -27,7 +27,7 @@ export interface Confirmacion {
   beneficiarioPadron?: Beneficiario;
   difiereNombre: boolean;
   nombrePadron?: string;
-  origen: 'GoogleSheets' | 'Manual' | 'CSV' | 'LiveSync' | 'Excepcional';
+  origen: 'GoogleSheets' | 'Manual' | 'CSV' | 'LiveSync' | 'Excepcional' | 'LibroMaestro';
   observacion?: string;
 }
 
@@ -178,6 +178,105 @@ export const CARRERA_VISUAL_MAP: Record<string, CarreraVisual> = {
     pillCount: 'bg-lime-700 text-white',
     color: 'bg-lime-100 text-lime-800',
     jornada: 'Nocturno'
+  },
+  'ING INFORMATICA': {
+    nombre: 'ING INFORMATICA',
+    icono: 'code',
+    badgeClass: 'bg-sky-100 text-sky-900 border-sky-200',
+    pillActive: 'bg-sky-600 text-white',
+    pillCount: 'bg-sky-700 text-white',
+    color: 'bg-sky-100 text-sky-800',
+    jornada: 'Diurno'
+  },
+  'INGENIERÍA INFORMÁTICA': {
+    nombre: 'INGENIERÍA INFORMÁTICA',
+    icono: 'code',
+    badgeClass: 'bg-sky-100 text-sky-900 border-sky-200',
+    pillActive: 'bg-sky-600 text-white',
+    pillCount: 'bg-sky-700 text-white',
+    color: 'bg-sky-100 text-sky-800',
+    jornada: 'Diurno'
+  },
+  'MEDICINA': {
+    nombre: 'MEDICINA',
+    icono: 'local_hospital',
+    badgeClass: 'bg-red-100 text-red-900 border-red-200',
+    pillActive: 'bg-red-600 text-white',
+    pillCount: 'bg-red-700 text-white',
+    color: 'bg-red-100 text-red-800',
+    jornada: 'Diurno'
+  },
+  'ENFERMERÍA': {
+    nombre: 'ENFERMERÍA',
+    icono: 'healing',
+    badgeClass: 'bg-violet-100 text-violet-900 border-violet-200',
+    pillActive: 'bg-violet-600 text-white',
+    pillCount: 'bg-violet-700 text-white',
+    color: 'bg-violet-100 text-violet-800',
+    jornada: 'Diurno'
+  },
+  'ENFERMERIA': {
+    nombre: 'ENFERMERIA',
+    icono: 'healing',
+    badgeClass: 'bg-violet-100 text-violet-900 border-violet-200',
+    pillActive: 'bg-violet-600 text-white',
+    pillCount: 'bg-violet-700 text-white',
+    color: 'bg-violet-100 text-violet-800',
+    jornada: 'Diurno'
+  },
+  'ING AGRONÓMICA': {
+    nombre: 'ING AGRONÓMICA',
+    icono: 'eco',
+    badgeClass: 'bg-green-100 text-green-900 border-green-200',
+    pillActive: 'bg-green-600 text-white',
+    pillCount: 'bg-green-700 text-white',
+    color: 'bg-green-100 text-green-800',
+    jornada: 'Diurno'
+  },
+  'ING AGRONOMICA': {
+    nombre: 'ING AGRONOMICA',
+    icono: 'eco',
+    badgeClass: 'bg-green-100 text-green-900 border-green-200',
+    pillActive: 'bg-green-600 text-white',
+    pillCount: 'bg-green-700 text-white',
+    color: 'bg-green-100 text-green-800',
+    jornada: 'Diurno'
+  },
+  'INGENIERÍA AGRONÓMICA': {
+    nombre: 'INGENIERÍA AGRONÓMICA',
+    icono: 'eco',
+    badgeClass: 'bg-green-100 text-green-900 border-green-200',
+    pillActive: 'bg-green-600 text-white',
+    pillCount: 'bg-green-700 text-white',
+    color: 'bg-green-100 text-green-800',
+    jornada: 'Diurno'
+  },
+  'AGROINDUSTRIAL': {
+    nombre: 'AGROINDUSTRIAL',
+    icono: 'agriculture',
+    badgeClass: 'bg-teal-100 text-teal-900 border-teal-200',
+    pillActive: 'bg-teal-600 text-white',
+    pillCount: 'bg-teal-700 text-white',
+    color: 'bg-teal-100 text-teal-800',
+    jornada: 'Diurno'
+  },
+  'ING ALIMENTOS': {
+    nombre: 'ING ALIMENTOS',
+    icono: 'restaurant',
+    badgeClass: 'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200',
+    pillActive: 'bg-fuchsia-600 text-white',
+    pillCount: 'bg-fuchsia-700 text-white',
+    color: 'bg-fuchsia-100 text-fuchsia-800',
+    jornada: 'Diurno'
+  },
+  'INGENIERÍA DE ALIMENTOS': {
+    nombre: 'INGENIERÍA DE ALIMENTOS',
+    icono: 'restaurant',
+    badgeClass: 'bg-fuchsia-100 text-fuchsia-900 border-fuchsia-200',
+    pillActive: 'bg-fuchsia-600 text-white',
+    pillCount: 'bg-fuchsia-700 text-white',
+    color: 'bg-fuchsia-100 text-fuchsia-800',
+    jornada: 'Diurno'
   }
 };
 
@@ -219,6 +318,12 @@ export function getVisualCarrera(carreraName?: string): CarreraVisual {
   if (upper.includes('INGL') || upper.includes('LICENC')) return CARRERA_VISUAL_MAP['LICENCIATURA EN INGLÉS'];
   if (upper.includes('PSICOL')) return CARRERA_VISUAL_MAP['PSICOLOGÍA'];
   if (upper.includes('TRABAJO') || upper.includes('SOCIAL')) return CARRERA_VISUAL_MAP['TRABAJO SOCIAL'];
+  if (upper.includes('INFORMAT') || upper.includes('INFORMÁT')) return CARRERA_VISUAL_MAP['ING INFORMATICA'];
+  if (upper.includes('MEDIC')) return CARRERA_VISUAL_MAP['MEDICINA'];
+  if (upper.includes('ENFERM')) return CARRERA_VISUAL_MAP['ENFERMERIA'];
+  if (upper.includes('AGRON') && !upper.includes('AGROIND')) return CARRERA_VISUAL_MAP['ING AGRONOMICA'];
+  if (upper.includes('AGROIND')) return CARRERA_VISUAL_MAP['AGROINDUSTRIAL'];
+  if (upper.includes('ALIMENT')) return CARRERA_VISUAL_MAP['ING ALIMENTOS'];
 
   return {
     nombre: carreraName,

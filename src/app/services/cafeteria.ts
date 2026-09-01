@@ -1198,43 +1198,66 @@ export class CafeteriaService {
 
       if (!resp || !resp.csvText) return;
 
-      const lines = resp.csvText.split('\n').filter(l => l.trim());
+      const lines = resp.csvText.split(/\r?\n/).filter(l => l.trim());
       if (lines.length < 2) return;
 
       const header = lines[0].toLowerCase();
       const isEntregasSheet = header.includes('codigo') && (header.includes('entrega') || header.includes('hora'));
       if (!isEntregasSheet) return;
 
+      const delimiter = lines[0].includes('\t') ? '\t' : lines[0].includes(';') ? ';' : ',';
       const rows = lines.slice(1);
-      const today = this.filtroFecha();
-      const todayConfirmaciones = this.confirmaciones().filter(c => c.fecha === today);
+      const existing = [...this.confirmaciones()];
+      let created = 0;
       let marked = 0;
 
       for (const row of rows) {
-        const cols = row.split('\t').map(c => c.trim());
+        const cols = row.split(delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''));
         if (cols.length < 6) continue;
 
         const [fecha, horaEntrega, codigo, nombre, carrera, tipoSubsidio, estado] = cols;
 
         if (estado?.toUpperCase() !== 'ENTREGADO') continue;
+        if (!fecha || !codigo) continue;
 
-        const match = todayConfirmaciones.find(c =>
-          c.codigo.trim().toLowerCase() === codigo.trim().toLowerCase() &&
-          c.tipoSubsidio.toLowerCase() === tipoSubsidio.trim().toLowerCase() &&
-          !c.entregado
+        const key = `${fecha.trim()}-${codigo.trim().toLowerCase()}-${tipoSubsidio?.trim().toLowerCase()}`;
+
+        const existingMatch = existing.find(c =>
+          `${c.fecha}-${c.codigo.toLowerCase()}-${c.tipoSubsidio.toLowerCase()}` === key
         );
 
-        if (match) {
-          match.entregado = true;
-          match.horaEntrega = horaEntrega || match.horaEntrega;
-          match.timestamp = `${fecha} ${horaEntrega || match.timestamp.split(' ')[1] || ''}`.trim();
-          marked++;
+        if (existingMatch) {
+          if (!existingMatch.entregado) {
+            existingMatch.entregado = true;
+            existingMatch.horaEntrega = horaEntrega || existingMatch.horaEntrega;
+            existingMatch.timestamp = `${fecha} ${horaEntrega || existingMatch.timestamp.split(' ')[1] || ''}`.trim();
+            marked++;
+          }
+        } else {
+          const padron = this.beneficiarios().find(b => b.codigo.trim().toLowerCase() === codigo.trim().toLowerCase());
+          const newConf: Confirmacion = {
+            id: `conf-maestro-${codigo}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            timestamp: `${fecha} ${horaEntrega || ''}`.trim(),
+            fecha: fecha.trim(),
+            codigo: codigo.trim(),
+            nombre: nombre?.trim() || padron?.nombre || 'Sin nombre',
+            carrera: carrera?.trim() || padron?.carrera || '',
+            tipoSubsidio: (tipoSubsidio?.trim() || 'Almuerzo') as 'Almuerzo' | 'Refrigerio',
+            entregado: true,
+            esBeneficiarioValido: !!padron,
+            beneficiarioPadron: padron || undefined,
+            difiereNombre: false,
+            origen: 'LibroMaestro',
+            horaEntrega: horaEntrega || undefined
+          };
+          existing.push(newConf);
+          created++;
         }
       }
 
-      if (marked > 0) {
-        this.confirmaciones.set([...this.confirmaciones()]);
-        this.saveToStorage(STORAGE_KEYS.CONFIRMACIONES, this.confirmaciones());
+      if (created > 0 || marked > 0) {
+        this.confirmaciones.set(existing);
+        this.saveToStorage(STORAGE_KEYS.CONFIRMACIONES, existing);
       }
     } catch {
       // Silently fail - entregas sync is best-effort
