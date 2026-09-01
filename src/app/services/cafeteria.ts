@@ -140,6 +140,9 @@ export class CafeteriaService {
 
     // Iniciar auto-sincronización en vivo cada 15 segundos
     this.iniciarAutoSync();
+
+    // Sincronizar entregas desde el Libro Maestro (marcar como entregados)
+    setTimeout(() => this.sincronizarEntregasDesdeMaestro().catch(() => {}), 3000);
   }
 
   private iniciarAutoSync(): void {
@@ -1169,6 +1172,9 @@ export class CafeteriaService {
       // Sincronizar automáticamente los formularios vinculados
       await this.sincronizarConGoogleSheets();
 
+      // Sincronizar entregas registradas en el Libro Maestro
+      await this.sincronizarEntregasDesdeMaestro();
+
       const summaryMsg = `Libro Maestro conectado: ${totalImportados} beneficiarios sincronizados y ${totalFormsActualizados} enlaces de formularios actualizados.`;
       this.lastSyncMessage.set({ type: 'success', text: summaryMsg });
       return { success: true, message: summaryMsg };
@@ -1178,6 +1184,60 @@ export class CafeteriaService {
       return { success: false, message: errorMsg };
     } finally {
       this.isSyncing.set(false);
+    }
+  }
+
+  private async sincronizarEntregasDesdeMaestro(): Promise<void> {
+    try {
+      const entregasUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_eD7coj74CyyYI6TUt68X1H-KaiQKc23VAW8ANvsCofp3TmYClguNGejpkhQyckEnbysM01viDjgE/pubhtml?gid=1988377971&single=true';
+      const resp = await firstValueFrom(
+        this.http.post<{ success: boolean; csvText: string; error?: string }>('/api/fetch-sheet', {
+          url: entregasUrl
+        }).pipe(catchError(() => of(null)))
+      );
+
+      if (!resp || !resp.csvText) return;
+
+      const lines = resp.csvText.split('\n').filter(l => l.trim());
+      if (lines.length < 2) return;
+
+      const header = lines[0].toLowerCase();
+      const isEntregasSheet = header.includes('codigo') && (header.includes('entrega') || header.includes('hora'));
+      if (!isEntregasSheet) return;
+
+      const rows = lines.slice(1);
+      const today = this.filtroFecha();
+      const todayConfirmaciones = this.confirmaciones().filter(c => c.fecha === today);
+      let marked = 0;
+
+      for (const row of rows) {
+        const cols = row.split('\t').map(c => c.trim());
+        if (cols.length < 6) continue;
+
+        const [fecha, horaEntrega, codigo, nombre, carrera, tipoSubsidio, estado] = cols;
+
+        if (estado?.toUpperCase() !== 'ENTREGADO') continue;
+
+        const match = todayConfirmaciones.find(c =>
+          c.codigo.trim().toLowerCase() === codigo.trim().toLowerCase() &&
+          c.tipoSubsidio.toLowerCase() === tipoSubsidio.trim().toLowerCase() &&
+          !c.entregado
+        );
+
+        if (match) {
+          match.entregado = true;
+          match.horaEntrega = horaEntrega || match.horaEntrega;
+          match.timestamp = `${fecha} ${horaEntrega || match.timestamp.split(' ')[1] || ''}`.trim();
+          marked++;
+        }
+      }
+
+      if (marked > 0) {
+        this.confirmaciones.set([...this.confirmaciones()]);
+        this.saveToStorage(STORAGE_KEYS.CONFIRMACIONES, this.confirmaciones());
+      }
+    } catch {
+      // Silently fail - entregas sync is best-effort
     }
   }
 
