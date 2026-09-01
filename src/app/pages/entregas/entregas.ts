@@ -184,140 +184,59 @@ import { SubsidioFiltro, CARRERAS_REGISTRADAS, getVisualCarrera, Confirmacion } 
         </div>
       </div>
 
-      <!-- BARRA DE DESPACHO RÁPIDO -->
-      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-xl p-4 sm:p-5 text-white shadow-md">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-xs">
-              <mat-icon class="text-xl">qr_code_scanner</mat-icon>
-            </div>
-            <div>
-              <h3 class="text-sm sm:text-base font-bold text-white leading-tight">Despacho Rápido en Ventanilla</h3>
-              <p class="text-xs text-slate-300">Digita o escanea el Código ID del estudiante para marcar la entrega al instante.</p>
-            </div>
-          </div>
-
-          <!-- Input form -->
-          <form (submit)="onDespachoRapido($event)" class="flex items-center gap-2 w-full sm:w-auto">
-            <div class="relative flex-1 sm:w-64">
-              <input
-                type="text"
-                [formControl]="codigoInput"
-                placeholder="Código ID (Ej: 202410...)"
-                class="w-full bg-slate-950/80 border border-slate-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-white placeholder-slate-400 text-sm rounded-lg px-3 py-2 pl-9 font-mono uppercase transition-all"
-                autofocus
-              />
-              <mat-icon class="absolute left-2.5 top-2.5 text-slate-400 text-sm">badge</mat-icon>
-            </div>
-            <button
-              type="submit"
-              class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm shrink-0 cursor-pointer"
-            >
-              <mat-icon class="text-sm">done</mat-icon>
-              <span>Despachar</span>
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <!-- FILTROS Y BÚSQUEDA -->
+      <!-- FILTROS -->
       <div class="bg-white rounded-xl border border-slate-200/90 p-4 shadow-xs space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <!-- 1. Búsqueda -->
-          <div class="relative">
-            <input
-              type="text"
-              [formControl]="busquedaControl"
-              placeholder="Buscar por nombre, código o carrera..."
-              class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 text-slate-800 text-xs sm:text-sm rounded-lg px-3 py-2 pl-9 transition-colors"
-            />
-            <mat-icon class="absolute left-2.5 top-2.5 text-slate-400 text-sm">search</mat-icon>
-            @if (busquedaControl.value) {
-              <button 
-                type="button"
-                (click)="busquedaControl.setValue('')"
-                class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs cursor-pointer"
-              >
-                <mat-icon class="text-sm">cancel</mat-icon>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+          <!-- Tipo de Subsidio -->
+          <div class="md:col-span-5">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Tipo de Subsidio</span>
+            <div class="bg-slate-100 p-1 rounded-lg flex items-center gap-1 border border-slate-200">
+              <button type="button" (click)="subsidioControl.setValue('Todos')" class="flex-1 py-1.5 px-2.5 rounded-md text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer font-medium" [class.bg-white]="subsidioControl.value === 'Todos'" [class.text-slate-900]="subsidioControl.value === 'Todos'" [class.font-bold]="subsidioControl.value === 'Todos'" [class.shadow-xs]="subsidioControl.value === 'Todos'" [class.text-slate-600]="subsidioControl.value !== 'Todos'">
+                <mat-icon class="text-sm">layers</mat-icon><span>Todos</span>
               </button>
-            }
+              <button type="button" (click)="subsidioControl.setValue('Almuerzo')" class="flex-1 py-1.5 px-2.5 rounded-md text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer font-medium" [class.bg-white]="subsidioControl.value === 'Almuerzo'" [class.text-emerald-700]="subsidioControl.value === 'Almuerzo'" [class.font-bold]="subsidioControl.value === 'Almuerzo'" [class.shadow-xs]="subsidioControl.value === 'Almuerzo'" [class.text-slate-600]="subsidioControl.value !== 'Almuerzo'">
+                <mat-icon class="text-sm">wb_sunny</mat-icon><span>Almuerzo</span>
+              </button>
+              <button type="button" (click)="subsidioControl.setValue('Refrigerio')" class="flex-1 py-1.5 px-2.5 rounded-md text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer font-medium" [class.bg-white]="subsidioControl.value === 'Refrigerio'" [class.text-blue-700]="subsidioControl.value === 'Refrigerio'" [class.font-bold]="subsidioControl.value === 'Refrigerio'" [class.shadow-xs]="subsidioControl.value === 'Refrigerio'" [class.text-slate-600]="subsidioControl.value !== 'Refrigerio'">
+                <mat-icon class="text-sm">nights_stay</mat-icon><span>Refrigerio</span>
+              </button>
+              <button type="button" (click)="subsidioControl.setValue('Desayuno')" class="flex-1 py-1.5 px-2.5 rounded-md text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer font-medium" [class.bg-white]="subsidioControl.value === 'Desayuno'" [class.text-orange-700]="subsidioControl.value === 'Desayuno'" [class.font-bold]="subsidioControl.value === 'Desayuno'" [class.shadow-xs]="subsidioControl.value === 'Desayuno'" [class.text-slate-600]="subsidioControl.value !== 'Desayuno'">
+                <mat-icon class="text-sm">free_breakfast</mat-icon><span>Desayuno</span>
+              </button>
+            </div>
           </div>
-
-          <!-- 2. Filtro Subsidio -->
-          <div>
-            <select
-              [formControl]="subsidioControl"
-              class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 text-slate-800 text-xs sm:text-sm rounded-lg px-3 py-2 transition-colors cursor-pointer"
-            >
-              <option value="Todos">Todos los Servicios</option>
-              <option value="Almuerzo">Solo Almuerzos (Diurno)</option>
-              <option value="Refrigerio">Solo Refrigerios (Noche)</option>
+          <!-- Fecha -->
+          <div class="md:col-span-4">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Fecha de Entrega</span>
+            <div class="flex items-center gap-1.5">
+              <button type="button" (click)="shiftDate(-1)" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg border border-slate-200 transition-colors cursor-pointer"><mat-icon class="text-sm">chevron_left</mat-icon></button>
+              <input type="date" [value]="cafeteria.filtroFecha()" (change)="onDateChange($event)" class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"/>
+              <button type="button" (click)="shiftDate(1)" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg border border-slate-200 transition-colors cursor-pointer"><mat-icon class="text-sm">chevron_right</mat-icon></button>
+              <button type="button" (click)="setTodayDate()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors cursor-pointer">Hoy</button>
+            </div>
+          </div>
+          <!-- Carrera -->
+          <div class="md:col-span-3">
+            <span class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Carrera</span>
+            <select [formControl]="carreraControl" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none cursor-pointer">
+              <option value="TODAS">Todas las carreras</option>
+              @for (c of carreras(); track c) { <option [value]="c">{{ c }}</option> }
             </select>
-          </div>
-
-          <!-- 3. Filtro Carrera -->
-          <div>
-            <select
-              [formControl]="carreraControl"
-              class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 text-slate-800 text-xs sm:text-sm rounded-lg px-3 py-2 transition-colors cursor-pointer"
-            >
-              <option value="TODAS">Todas las Carreras</option>
-              @for (c of carreras(); track c) {
-                <option [value]="c">{{ c }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- 4. Filtro Fecha -->
-          <div>
-            <input
-              type="date"
-              [formControl]="fechaControl"
-              class="w-full bg-slate-50 border border-slate-200 focus:bg-white focus:border-blue-500 text-slate-800 text-xs sm:text-sm rounded-lg px-3 py-2 transition-colors cursor-pointer font-medium"
-            />
           </div>
         </div>
 
-        <!-- Pills selector rápido de Subsidio y Ordenamiento -->
-        <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
-          <div class="flex flex-wrap items-center gap-1.5">
-            <span class="text-xs font-semibold text-slate-400 mr-1">Filtrar:</span>
-            <button
-              type="button"
-              (click)="subsidioControl.setValue('Todos')"
-              [class]="subsidioControl.value === 'Todos' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
-              class="px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer"
-            >
-              Todos ({{ cafeteria.statsEntregas().totalEntregados }})
-            </button>
-            <button
-              type="button"
-              (click)="subsidioControl.setValue('Almuerzo')"
-              [class]="subsidioControl.value === 'Almuerzo' ? 'bg-amber-600 text-white' : 'bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-200'"
-              class="px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer"
-            >
-              Almuerzos ({{ cafeteria.statsEntregas().almuerzos }})
-            </button>
-            <button
-              type="button"
-              (click)="subsidioControl.setValue('Refrigerio')"
-              [class]="subsidioControl.value === 'Refrigerio' ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200'"
-              class="px-2.5 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer"
-            >
-              Refrigerios ({{ cafeteria.statsEntregas().refrigerios }})
-            </button>
+        <!-- Busqueda + Orden -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2 border-t border-slate-100">
+          <div class="relative flex-1 max-w-md">
+            <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</mat-icon>
+            <input type="text" [formControl]="busquedaControl" placeholder="Buscar por nombre, código o carrera..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20"/>
           </div>
-
-          <!-- Ordenar por -->
-          <div class="flex items-center gap-1.5 text-xs">
+          <div class="flex items-center gap-1.5 text-xs ml-auto">
             <span class="text-slate-400 font-semibold">Ordenar:</span>
-            <select
-              [formControl]="ordenControl"
-              class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-md px-2 py-1 focus:bg-white cursor-pointer"
-            >
-              <option value="hora_desc">Más recientes primero (Hora ↓)</option>
-              <option value="hora_asc">Más antiguos primero (Hora ↑)</option>
-              <option value="nombre">Nombre Estudiante (A-Z)</option>
+            <select [formControl]="ordenControl" class="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-md px-2 py-1.5 focus:bg-white cursor-pointer">
+              <option value="hora_desc">Más recientes ↓</option>
+              <option value="hora_asc">Más antiguos ↑</option>
+              <option value="nombre">Nombre (A-Z)</option>
               <option value="codigo">Código ID</option>
             </select>
           </div>
@@ -334,7 +253,7 @@ import { SubsidioFiltro, CARRERAS_REGISTRADAS, getVisualCarrera, Confirmacion } 
             </h3>
           </div>
           <span class="text-xs text-slate-500 font-medium">
-            Fecha: {{ fechaControl.value }}
+            Fecha: {{ cafeteria.filtroFecha() }}
           </span>
         </div>
 
@@ -411,10 +330,15 @@ import { SubsidioFiltro, CARRERAS_REGISTRADAS, getVisualCarrera, Confirmacion } 
                           <mat-icon class="text-xs">lunch_dining</mat-icon>
                           Almuerzo
                         </span>
-                      } @else {
+                      } @else if (c.tipoSubsidio === 'Refrigerio') {
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
                           <mat-icon class="text-xs">nightlife</mat-icon>
                           Refrigerio
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-800 border border-orange-200">
+                          <mat-icon class="text-xs">free_breakfast</mat-icon>
+                          Desayuno
                         </span>
                       }
                     </td>
@@ -487,11 +411,9 @@ export class Entregas {
   });
 
   // Form Controls
-  readonly codigoInput = new FormControl('');
   readonly busquedaControl = new FormControl('');
   readonly subsidioControl = new FormControl<SubsidioFiltro>('Todos', { nonNullable: true });
   readonly carreraControl = new FormControl<string>('TODAS', { nonNullable: true });
-  readonly fechaControl = new FormControl<string>(this.cafeteria.filtroFecha(), { nonNullable: true });
   readonly ordenControl = new FormControl<string>('hora_desc', { nonNullable: true });
 
   readonly despachoMensaje = signal<{ success: boolean; message: string } | null>(null);
@@ -529,10 +451,6 @@ export class Entregas {
     this.carreraControl.valueChanges.subscribe(val => {
       this.cafeteria.setFiltroCarrera(val || 'TODAS');
     });
-
-    this.fechaControl.valueChanges.subscribe(val => {
-      this.cafeteria.setFiltroFecha(val || '');
-    });
   }
 
   readonly entregasFiltradas = computed(() => {
@@ -560,16 +478,6 @@ export class Entregas {
     return list;
   });
 
-  onDespachoRapido(event: Event): void {
-    event.preventDefault();
-    const code = this.codigoInput.value?.trim();
-    if (!code) return;
-
-    const res = this.cafeteria.despacharPorCodigo(code);
-    this.despachoMensaje.set(res);
-    this.codigoInput.setValue('');
-  }
-
   deshacerEntrega(conf: Confirmacion): void {
     if (confirm(`¿Deseas revertir la entrega de ${conf.nombre} (${conf.codigo}) y dejarlo como pendiente?`)) {
       this.cafeteria.toggleEntregado(conf.id);
@@ -578,6 +486,25 @@ export class Entregas {
         message: `Entrega de ${conf.nombre} revertida correctamente a estado PENDIENTE.`
       });
     }
+  }
+
+  onDateChange(e: Event): void {
+    const val = (e.target as HTMLInputElement).value;
+    if (val) this.cafeteria.setFiltroFecha(val);
+  }
+
+  setTodayDate(): void {
+    const now = new Date();
+    const dStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    this.cafeteria.setFiltroFecha(dStr);
+  }
+
+  shiftDate(days: number): void {
+    const current = this.cafeteria.filtroFecha();
+    const d = new Date(current + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    this.cafeteria.setFiltroFecha(dStr);
   }
 
   getVisual(carrera: string) {

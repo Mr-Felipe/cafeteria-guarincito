@@ -1,5 +1,5 @@
-export type TipoSubsidio = 'Almuerzo' | 'Refrigerio' | 'Ambos';
-export type SubsidioFiltro = 'Todos' | 'Almuerzo' | 'Refrigerio';
+export type TipoSubsidio = 'Almuerzo' | 'Refrigerio' | 'Desayuno' | 'Ambos';
+export type SubsidioFiltro = 'Todos' | 'Almuerzo' | 'Refrigerio' | 'Desayuno';
 export type Genero = 'Hombre' | 'Mujer' | 'Otro';
 
 export interface Beneficiario {
@@ -20,7 +20,7 @@ export interface Confirmacion {
   codigo: string;
   nombre: string;
   carrera: string;
-  tipoSubsidio: 'Almuerzo' | 'Refrigerio';
+  tipoSubsidio: 'Almuerzo' | 'Refrigerio' | 'Desayuno';
   entregado: boolean;
   horaEntrega?: string;
   esBeneficiarioValido: boolean;
@@ -34,7 +34,7 @@ export interface Confirmacion {
 export interface FormularioConfig {
   id: string;
   nombre: string;
-  tipo: 'Almuerzo' | 'Refrigerio';
+  tipo: 'Almuerzo' | 'Refrigerio' | 'Desayuno';
   urlSheet: string;
   urlForm: string;
   horario: string;
@@ -76,7 +76,10 @@ export const CARRERAS_REGISTRADAS = [
   'LICENCIATURA EN INGLÉS',
   'PSICOLOGÍA',
   'TRABAJO SOCIAL',
-  'ADMINISTRACIÓN FINANCIERA'
+  'ADMINISTRACIÓN FINANCIERA',
+  'ADEA',
+  'REGENCIA',
+  'TECNICO EN PROCESOS'
 ] as const;
 
 export const CARRERA_VISUAL_MAP: Record<string, CarreraVisual> = {
@@ -277,6 +280,42 @@ export const CARRERA_VISUAL_MAP: Record<string, CarreraVisual> = {
     pillCount: 'bg-fuchsia-700 text-white',
     color: 'bg-fuchsia-100 text-fuchsia-800',
     jornada: 'Diurno'
+  },
+  'ADEA': {
+    nombre: 'ADEA',
+    icono: 'menu_book',
+    badgeClass: 'bg-amber-100 text-amber-900 border-amber-200',
+    pillActive: 'bg-amber-600 text-white',
+    pillCount: 'bg-amber-700 text-white',
+    color: 'bg-amber-100 text-amber-800',
+    jornada: 'Fin de semana'
+  },
+  'REGENCIA': {
+    nombre: 'REGENCIA',
+    icono: 'medical_services',
+    badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-200',
+    pillActive: 'bg-cyan-600 text-white',
+    pillCount: 'bg-cyan-700 text-white',
+    color: 'bg-cyan-100 text-cyan-800',
+    jornada: 'Fin de semana'
+  },
+  'TECNICO EN PROCESOS': {
+    nombre: 'TECNICO EN PROCESOS',
+    icono: 'biotech',
+    badgeClass: 'bg-indigo-100 text-indigo-900 border-indigo-200',
+    pillActive: 'bg-indigo-600 text-white',
+    pillCount: 'bg-indigo-700 text-white',
+    color: 'bg-indigo-100 text-indigo-800',
+    jornada: 'Fin de semana'
+  },
+  'TECNICO EN SALUD': {
+    nombre: 'TECNICO EN SALUD',
+    icono: 'biotech',
+    badgeClass: 'bg-indigo-100 text-indigo-900 border-indigo-200',
+    pillActive: 'bg-indigo-600 text-white',
+    pillCount: 'bg-indigo-700 text-white',
+    color: 'bg-indigo-100 text-indigo-800',
+    jornada: 'Fin de semana'
   }
 };
 
@@ -324,6 +363,10 @@ export function getVisualCarrera(carreraName?: string): CarreraVisual {
   if (upper.includes('AGRON') && !upper.includes('AGROIND')) return CARRERA_VISUAL_MAP['ING AGRONOMICA'];
   if (upper.includes('AGROIND')) return CARRERA_VISUAL_MAP['AGROINDUSTRIAL'];
   if (upper.includes('ALIMENT')) return CARRERA_VISUAL_MAP['ING ALIMENTOS'];
+  if (upper.includes('ADEA')) return CARRERA_VISUAL_MAP['ADEA'];
+  if (upper.includes('REGENC')) return CARRERA_VISUAL_MAP['REGENCIA'];
+  if (upper.includes('TECNICO') && (upper.includes('PROCESO') || upper.includes('SALUD'))) return CARRERA_VISUAL_MAP['TECNICO EN PROCESOS'];
+  if (upper.includes('TECNICO')) return CARRERA_VISUAL_MAP['TECNICO EN PROCESOS'];
 
   return {
     nombre: carreraName,

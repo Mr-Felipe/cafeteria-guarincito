@@ -50,6 +50,19 @@ const SEED_FORMULARIOS: FormularioConfig[] = [
     activo: true,
     ultimaSincronizacion: 'Listo para sincronizar',
     totalRespuestasSincronizadas: 0
+  },
+  {
+    id: 'desayuno-domingo',
+    nombre: 'Confirmación Desayuno Dominical',
+    tipo: 'Desayuno',
+    urlSheet: '',
+    urlForm: '',
+    horario: '7:00 AM a 10:00 AM',
+    carrerasDescripcion: 'REGENCIA · TECNICO EN PROCESOS · ADEA',
+    campos: 'Marca temporal · Carrera · Código ID · Nombre Completo',
+    activo: false,
+    ultimaSincronizacion: 'Pendiente - Crear formulario',
+    totalRespuestasSincronizadas: 0
   }
 ];
 
@@ -390,6 +403,7 @@ export class CafeteriaService {
     const totalEntregados = entregados.length;
     const almuerzos = entregados.filter(c => c.tipoSubsidio === 'Almuerzo').length;
     const refrigerios = entregados.filter(c => c.tipoSubsidio === 'Refrigerio').length;
+    const desayunos = entregados.filter(c => c.tipoSubsidio === 'Desayuno').length;
     const excepcionales = entregados.filter(c => c.origen === 'Excepcional').length;
     const totalConfirmados = this.confirmadosFiltrados().length;
     const porcentaje = totalConfirmados > 0 ? Math.round((totalEntregados / totalConfirmados) * 100) : 0;
@@ -405,6 +419,7 @@ export class CafeteriaService {
       porcentaje,
       almuerzos,
       refrigerios,
+      desayunos,
       excepcionales,
       ultimaEntrega,
       primerEntrega
@@ -438,70 +453,6 @@ export class CafeteriaService {
 
   clearSyncMessage(): void {
     this.lastSyncMessage.set(null);
-  }
-
-  // Quick Dispatch by ID Code
-  despacharPorCodigo(rawCode: string): { success: boolean; message: string; conf?: Confirmacion } {
-    const code = rawCode.trim();
-    if (!code) {
-      return { success: false, message: 'Ingrese un código estudiantil válido.' };
-    }
-
-    const fecha = this.filtroFecha();
-    const subsidio = this.filtroSubsidio();
-
-    // Look for matching confirmation for current date & subsidy
-    const all = this.confirmaciones();
-    const matchIndex = all.findIndex(c => {
-      if (c.fecha !== fecha) return false;
-      if (c.codigo.trim().toLowerCase() !== code.toLowerCase()) return false;
-      if (subsidio !== 'Todos' && c.tipoSubsidio !== subsidio) return false;
-      return true;
-    });
-
-    if (matchIndex !== -1) {
-      const match = all[matchIndex];
-      if (match.entregado) {
-        return {
-          success: false,
-          message: `¡Atención! La ración para ${match.nombre} (${match.codigo}) ya fue entregada a las ${match.horaEntrega || 'horas previas'}.`,
-          conf: match
-        };
-      }
-
-      // Mark delivered
-      const now = new Date();
-      const hora = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const updated = [...all];
-      updated[matchIndex] = {
-        ...match,
-        entregado: true,
-        horaEntrega: hora
-      };
-
-      this.confirmaciones.set(updated);
-      this.saveToStorage(STORAGE_KEYS.CONFIRMACIONES, updated);
-
-      return {
-        success: true,
-        message: `¡Ración DESPACHADA con éxito! ${match.nombre} · ${match.carrera} (${match.tipoSubsidio}).`,
-        conf: updated[matchIndex]
-      };
-    }
-
-    // Check if student is in padrón but didn't confirm
-    const padronBen = this.beneficiarios().find(b => b.codigo.trim().toLowerCase() === code.toLowerCase() && b.activo);
-    if (padronBen) {
-      return {
-        success: false,
-        message: `El estudiante ${padronBen.nombre} está en el padrón (${padronBen.carrera}), pero NO confirmó en el formulario para hoy.`
-      };
-    }
-
-    return {
-      success: false,
-      message: `Código [${code}] no encontrado en las confirmaciones de hoy ni en el padrón activo.`
-    };
   }
 
   // Toggle delivery status
@@ -594,7 +545,7 @@ export class CafeteriaService {
   }
 
   // Deliver exceptional ration for non-confirmed padrón student
-  marcarEntregaExcepcional(ben: Beneficiario, tipoSubsidio: 'Almuerzo' | 'Refrigerio'): void {
+  marcarEntregaExcepcional(ben: Beneficiario, tipoSubsidio: 'Almuerzo' | 'Refrigerio' | 'Desayuno'): void {
     const today = this.filtroFecha();
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -829,10 +780,14 @@ export class CafeteriaService {
         else if (sRaw.includes('REF') || sRaw.includes('NOCH')) subsidio = 'Refrigerio';
         else subsidio = 'Almuerzo';
       } else {
-        // Auto-detect subsidio based on career (nocturnal careers = Refrigerio)
+        // Auto-detect subsidio based on career (nocturnal careers = Refrigerio, weekend = special)
         const cUpper = carrera.toUpperCase();
         if (cUpper.includes('FINANCIER') || cUpper.includes('TRABAJO SOCIAL')) {
           subsidio = 'Refrigerio';
+        } else if (cUpper.includes('REGENC') || cUpper.includes('TECNICO')) {
+          subsidio = 'Ambos'; // Refrigerio (sáb) + Desayuno (dom)
+        } else if (cUpper.includes('ADEA')) {
+          subsidio = 'Almuerzo'; // Solo sábados
         }
       }
 
@@ -872,7 +827,7 @@ export class CafeteriaService {
   // Import Confirmations from CSV / TSV (from Google Sheets or Google Forms export)
   importarConfirmacionesCSV(
     csvText: string,
-    tipoOverride?: 'Almuerzo' | 'Refrigerio' | 'Auto'
+    tipoOverride?: 'Almuerzo' | 'Refrigerio' | 'Desayuno' | 'Auto'
   ): { total: number; nuevos: number } {
     const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
     if (lines.length === 0) return { total: 0, nuevos: 0 };
@@ -899,7 +854,7 @@ export class CafeteriaService {
       let carrera = '';
       let codigo = '';
       let nombre = '';
-      let tipo: 'Almuerzo' | 'Refrigerio' = tipoOverride && tipoOverride !== 'Auto' ? tipoOverride : 'Almuerzo';
+      let tipo: 'Almuerzo' | 'Refrigerio' | 'Desayuno' = tipoOverride && tipoOverride !== 'Auto' ? tipoOverride : 'Almuerzo';
 
       if (cols.length >= 4) {
         timestamp = cols[0] || timestamp;
@@ -907,8 +862,11 @@ export class CafeteriaService {
         codigo = cols[2] || '';
         nombre = cols[3] || '';
         if (cols.length >= 5 && cols[4]) {
-          if (cols[4].toUpperCase().includes('REF') || cols[4].toUpperCase().includes('NOCH')) {
+          const colUpper = cols[4].toUpperCase();
+          if (colUpper.includes('REF') || colUpper.includes('NOCH')) {
             tipo = 'Refrigerio';
+          } else if (colUpper.includes('DESAY') || colUpper.includes('DES')) {
+            tipo = 'Desayuno';
           }
         }
       } else if (cols.length === 3) {
@@ -1242,7 +1200,7 @@ export class CafeteriaService {
             codigo: codigo.trim(),
             nombre: nombre?.trim() || padron?.nombre || 'Sin nombre',
             carrera: carrera?.trim() || padron?.carrera || '',
-            tipoSubsidio: (tipoSubsidio?.trim() || 'Almuerzo') as 'Almuerzo' | 'Refrigerio',
+            tipoSubsidio: (tipoSubsidio?.trim() || 'Almuerzo') as 'Almuerzo' | 'Refrigerio' | 'Desayuno',
             entregado: true,
             esBeneficiarioValido: !!padron,
             beneficiarioPadron: padron || undefined,

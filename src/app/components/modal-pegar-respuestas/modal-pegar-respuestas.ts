@@ -127,7 +127,7 @@ export class ModalPegarRespuestas {
   resultMsg = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   pasteForm = new FormGroup({
-    tipo: new FormControl<'Auto' | 'Almuerzo' | 'Refrigerio'>('Auto', { nonNullable: true }),
+    tipo: new FormControl<'Auto' | 'Almuerzo' | 'Refrigerio' | 'Desayuno'>('Auto', { nonNullable: true }),
     rawText: new FormControl<string>('', { validators: [Validators.required], nonNullable: true })
   });
 

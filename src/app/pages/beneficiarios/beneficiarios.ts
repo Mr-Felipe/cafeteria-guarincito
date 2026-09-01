@@ -252,6 +252,10 @@ import { ModalNuevoBeneficiario } from '../../components/modal-nuevo-beneficiari
                       <span class="font-semibold text-blue-800 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full text-[10px]">
                         Refrigerio
                       </span>
+                    } @else if (b.subsidio === 'Desayuno') {
+                      <span class="font-semibold text-orange-800 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full text-[10px]">
+                        Desayuno
+                      </span>
                     } @else {
                       <span class="font-semibold text-purple-800 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full text-[10px]">
                         Ambos Subsidios

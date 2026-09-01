@@ -13,34 +13,34 @@ export default {
   {
     "renderMode": 2,
     "preload": [
-      "chunk-U7DV2C7L.js",
-      "chunk-LFEYSS2I.js",
-      "chunk-T6WJT3NI.js"
+      "chunk-6SXKAKPF.js",
+      "chunk-VKWXHBT2.js",
+      "chunk-YSMGMTGV.js"
     ],
     "route": "/confirmados"
   },
   {
     "renderMode": 2,
     "preload": [
-      "chunk-Y7OFE6XD.js",
-      "chunk-T6WJT3NI.js"
+      "chunk-7L7M2ALL.js",
+      "chunk-YSMGMTGV.js"
     ],
     "route": "/entregas"
   },
   {
     "renderMode": 2,
     "preload": [
-      "chunk-ITD7M2YW.js",
-      "chunk-T6WJT3NI.js"
+      "chunk-C7ZBHATR.js",
+      "chunk-YSMGMTGV.js"
     ],
     "route": "/beneficiarios"
   },
   {
     "renderMode": 2,
     "preload": [
-      "chunk-6MLUV4HZ.js",
-      "chunk-LFEYSS2I.js",
-      "chunk-T6WJT3NI.js"
+      "chunk-EN2LEJF4.js",
+      "chunk-VKWXHBT2.js",
+      "chunk-YSMGMTGV.js"
     ],
     "route": "/google-forms"
   },
@@ -52,12 +52,12 @@ export default {
 ],
   entryPointToBrowserMapping: undefined,
   assets: {
-    'index.csr.html': {size: 31138, hash: 'fa2f766fad10fbb50f553a4a30609fe1e6237e554454ef29a51833311b33c088', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
-    'index.server.html': {size: 16690, hash: '9c0842c2ad06f076b39cf6c0a48a394df8e14aec365b64a2ab5cc86c698c22c0', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
-    'beneficiarios/index.html': {size: 65514, hash: '98e50112803d2706c004bdaa514e42a55cdbaa98e5b81fd41a87220d09f178ba', text: () => import('./assets-chunks/beneficiarios_index_html.mjs').then(m => m.default)},
-    'confirmados/index.html': {size: 73666, hash: '32969ba4600b1715013362f625dc4e67dc936e57ad8a1b95617b2c0a1e61b197', text: () => import('./assets-chunks/confirmados_index_html.mjs').then(m => m.default)},
-    'entregas/index.html': {size: 72087, hash: 'cec2b1b4b845265b1951bb444419a2d266dd3d3ca8d6988a02515e062ffe45c5', text: () => import('./assets-chunks/entregas_index_html.mjs').then(m => m.default)},
-    'google-forms/index.html': {size: 88547, hash: '846c8bc2c0db21cc73939490d7cbf9f866829ff2daf52f4a99787081aea02fa1', text: () => import('./assets-chunks/google-forms_index_html.mjs').then(m => m.default)},
-    'styles-EZH2HO3A.css': {size: 61474, hash: 'huLfZIWmI3c', text: () => import('./assets-chunks/styles-EZH2HO3A_css.mjs').then(m => m.default)}
+    'index.csr.html': {size: 31220, hash: 'e5801653f720e5bb83720bd4ea3decf5e09663ce3cb004f87e09ecafe332248e', text: () => import('./assets-chunks/index_csr_html.mjs').then(m => m.default)},
+    'index.server.html': {size: 16690, hash: '920c90eefbe29e00d427067057336eab7bd2bab7713445f84d776d0269c32f77', text: () => import('./assets-chunks/index_server_html.mjs').then(m => m.default)},
+    'confirmados/index.html': {size: 78320, hash: '00afd2ca74dba7429a723966d675309ba3ac9e76daea33a53c8455b0ab741c42', text: () => import('./assets-chunks/confirmados_index_html.mjs').then(m => m.default)},
+    'entregas/index.html': {size: 70595, hash: 'f406c402bf069683caf6a8836862d0f9105659c78c58b630811938ae8155b5a7', text: () => import('./assets-chunks/entregas_index_html.mjs').then(m => m.default)},
+    'beneficiarios/index.html': {size: 65598, hash: '1a4f874aaf90adf7dd0d1d8a3f0962fd05dc8cd1b5d5eae22304fe5b336b702d', text: () => import('./assets-chunks/beneficiarios_index_html.mjs').then(m => m.default)},
+    'google-forms/index.html': {size: 88631, hash: 'f5375f7d7e6ec18f0ca5de3260f44c25be8806f1f0adc327d0b2c23a4170b0a1', text: () => import('./assets-chunks/google-forms_index_html.mjs').then(m => m.default)},
+    'styles-V6MJI5SO.css': {size: 62333, hash: 'wPkuUFvny8w', text: () => import('./assets-chunks/styles-V6MJI5SO_css.mjs').then(m => m.default)}
   },
 };

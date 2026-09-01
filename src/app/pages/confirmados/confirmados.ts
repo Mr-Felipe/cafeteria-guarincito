@@ -1,15 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CafeteriaService } from '../../services/cafeteria';
-import { getVisualCarrera, Beneficiario } from '../../models/cafeteria.models';
+import { getVisualCarrera, Beneficiario, Confirmacion } from '../../models/cafeteria.models';
 import { ModalPegarRespuestas } from '../../components/modal-pegar-respuestas/modal-pegar-respuestas';
 import { ModalPlanilla } from '../../components/modal-planilla/modal-planilla';
 
 @Component({
   selector: 'app-confirmados',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, MatIconModule, ModalPegarRespuestas, ModalPlanilla],
+  imports: [RouterLink, MatIconModule, ReactiveFormsModule, ModalPegarRespuestas, ModalPlanilla],
   template: `
     <div class="space-y-6">
       <!-- HEADER -->
@@ -78,13 +79,18 @@ import { ModalPlanilla } from '../../components/modal-planilla/modal-planilla';
               <button type="button" (click)="cafeteria.setFiltroSubsidio('Refrigerio')" class="flex-1 py-1.5 px-2.5 rounded-md text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer font-medium" [class.bg-white]="cafeteria.filtroSubsidio() === 'Refrigerio'" [class.text-blue-700]="cafeteria.filtroSubsidio() === 'Refrigerio'" [class.font-bold]="cafeteria.filtroSubsidio() === 'Refrigerio'" [class.shadow-xs]="cafeteria.filtroSubsidio() === 'Refrigerio'" [class.text-slate-600]="cafeteria.filtroSubsidio() !== 'Refrigerio'">
                 <mat-icon class="text-sm">nights_stay</mat-icon><span>Refrigerio</span>
               </button>
+              <button type="button" (click)="cafeteria.setFiltroSubsidio('Desayuno')" class="flex-1 py-1.5 px-2.5 rounded-md text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer font-medium" [class.bg-white]="cafeteria.filtroSubsidio() === 'Desayuno'" [class.text-orange-700]="cafeteria.filtroSubsidio() === 'Desayuno'" [class.font-bold]="cafeteria.filtroSubsidio() === 'Desayuno'" [class.shadow-xs]="cafeteria.filtroSubsidio() === 'Desayuno'" [class.text-slate-600]="cafeteria.filtroSubsidio() !== 'Desayuno'">
+                <mat-icon class="text-sm">free_breakfast</mat-icon><span>Desayuno</span>
+              </button>
             </div>
           </div>
           <!-- Fecha -->
           <div class="md:col-span-4">
             <label for="filtro-fecha-input" class="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Fecha de Servicio</label>
-            <div class="flex items-center gap-2">
-              <input id="filtro-fecha-input" type="date" [value]="cafeteria.filtroFecha()" (change)="onDateChange($event)" class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"/>
+            <div class="flex items-center gap-1.5">
+              <button type="button" (click)="shiftDate(-1)" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg border border-slate-200 transition-colors cursor-pointer"><mat-icon class="text-sm">chevron_left</mat-icon></button>
+              <input id="filtro-fecha-input" type="date" [value]="cafeteria.filtroFecha()" (change)="onDateChange($event)" class="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"/>
+              <button type="button" (click)="shiftDate(1)" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg border border-slate-200 transition-colors cursor-pointer"><mat-icon class="text-sm">chevron_right</mat-icon></button>
               <button type="button" (click)="setTodayDate()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg border border-slate-200 transition-colors cursor-pointer">Hoy</button>
             </div>
           </div>
@@ -114,10 +120,62 @@ import { ModalPlanilla } from '../../components/modal-planilla/modal-planilla';
           <div class="w-full bg-slate-100 h-1.5 rounded-full mt-3 overflow-hidden"><div class="bg-purple-500 h-full" [style.width.%]="cafeteria.kpiStats().extranos > 0 ? 100 : 0"></div></div>
         </div>
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm bg-blue-50 border-blue-100 flex flex-col justify-between">
-          <div><div class="text-blue-700 text-xs font-semibold uppercase tracking-wider mb-1">Sin Confirmar</div><div class="text-2xl font-bold text-blue-900">{{ cafeteria.noConfirmaron().length }}</div></div>
+          <div><div class="text-blue-700 text-xs font-semibold uppercase tracking-wider mb-1">Sin Confirmar ({{ dayName() }})</div><div class="text-2xl font-bold text-blue-900">{{ cafeteria.noConfirmaron().length }}</div></div>
           <div class="text-xs text-blue-600 mt-2 font-medium">Raciones liberadas</div>
         </div>
       </section>
+
+      <!-- DESPACHO POR BÚSQUEDA -->
+      <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-xl p-4 sm:p-5 text-white shadow-md">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex items-center gap-3 shrink-0">
+            <div class="w-10 h-10 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-xs">
+              <mat-icon class="text-xl">qr_code_scanner</mat-icon>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-white leading-tight">Despacho Rápido</h3>
+              <p class="text-xs text-slate-300">Buscar y entregar al instante</p>
+            </div>
+          </div>
+          <div class="flex-1 flex items-center gap-2">
+            <div class="relative flex-1">
+              <input type="text" [formControl]="busquedaDespacho" (input)="buscarParaDespachar()" placeholder="Código ID o nombre del estudiante..." class="w-full bg-slate-950/80 border border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-white placeholder-slate-400 text-sm rounded-lg px-3 py-2 pl-9 font-mono uppercase transition-all"/>
+              <mat-icon class="absolute left-2.5 top-2.5 text-slate-400 text-sm">search</mat-icon>
+            </div>
+          </div>
+        </div>
+        @if (resultadoDespacho()) {
+          <div class="mt-3 p-3 rounded-lg border flex items-center justify-between gap-3" [class.bg-emerald-900/40]="resultadoDespacho()!.success" [class.border-emerald-700]="resultadoDespacho()!.success" [class.bg-red-900/40]="!resultadoDespacho()!.success" [class.border-red-700]="!resultadoDespacho()!.success">
+            <div class="flex items-center gap-3">
+              @if (resultadoDespacho()!.conf) {
+                @let c = resultadoDespacho()!.conf!;
+                @let visual = getVisual(c.carrera);
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0" [class]="resultadoDespacho()!.success ? 'bg-emerald-600' : 'bg-red-600'">
+                  {{ getInitials(c.nombre) }}
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-white">{{ c.nombre }}</p>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="font-mono text-[10px] text-slate-300 bg-slate-800 px-1.5 py-0.5 rounded">ID: {{ c.codigo }}</span>
+                    <span class="px-1.5 py-0.5 text-[10px] font-semibold rounded border" [class]="visual.badgeClass">{{ c.carrera }}</span>
+                  </div>
+                </div>
+              } @else {
+                <mat-icon class="text-lg" [class.text-emerald-400]="resultadoDespacho()!.success" [class.text-red-400]="!resultadoDespacho()!.success">{{ resultadoDespacho()!.success ? 'check_circle' : 'warning' }}</mat-icon>
+                <p class="text-sm font-semibold text-white">{{ resultadoDespacho()!.message }}</p>
+              }
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              @if (resultadoDespacho()!.conf && !resultadoDespacho()!.conf!.entregado) {
+                <button type="button" (click)="entregarDesdeBusqueda()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer">
+                  <mat-icon class="text-sm">check_circle</mat-icon><span>Entregar</span>
+                </button>
+              }
+              <button type="button" (click)="resultadoDespacho.set(null)" class="p-1.5 text-slate-400 hover:text-white rounded-lg cursor-pointer"><mat-icon class="text-base">close</mat-icon></button>
+            </div>
+          </div>
+        }
+      </div>
 
       <!-- ACORDEONES -->
       <div class="space-y-4">
@@ -169,8 +227,10 @@ import { ModalPlanilla } from '../../components/modal-planilla/modal-planilla';
                         <span class="px-2.5 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">VERIFICADO</span>
                         @if (c.tipoSubsidio === 'Almuerzo') {
                           <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">Almuerzo</span>
-                        } @else {
+                        } @else if (c.tipoSubsidio === 'Refrigerio') {
                           <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-50 text-blue-700 border border-blue-200">Refrigerio</span>
+                        } @else {
+                          <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-50 text-orange-700 border border-orange-200">Desayuno</span>
                         }
                         @if (c.difiereNombre) {
                           <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1" title="Nombre en padrón: {{ c.nombrePadron }}">
@@ -333,12 +393,23 @@ export class Confirmados {
     return carreras.sort();
   });
 
+  readonly dayName = computed(() => {
+    const fecha = this.cafeteria.filtroFecha();
+    const d = new Date(fecha + 'T12:00:00');
+    const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    return days[d.getDay()];
+  });
+
   modalPegarOpen = signal<boolean>(false);
   modalPlanillaOpen = signal<boolean>(false);
 
   accordionValidosOpen = signal<boolean>(true);
   accordionExtranosOpen = signal<boolean>(true);
   accordionNoConfirmaronOpen = signal<boolean>(true);
+
+  // Despacho rápido por búsqueda
+  readonly busquedaDespacho = new FormControl('');
+  readonly resultadoDespacho = signal<{ success: boolean; message: string; conf?: Confirmacion } | null>(null);
 
   // Per-section filters
   busquedaValidos = signal('');
@@ -425,6 +496,15 @@ export class Confirmados {
     return getVisualCarrera(carrera);
   }
 
+  getInitials(name: string): string {
+    if (!name) return 'ES';
+    const parts = name.trim().split(' ').filter(Boolean);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  }
+
   onSyncSheets(): void {
     this.cafeteria.sincronizarConGoogleSheets();
   }
@@ -440,13 +520,50 @@ export class Confirmados {
     this.cafeteria.setFiltroFecha(dStr);
   }
 
+  shiftDate(days: number): void {
+    const current = this.cafeteria.filtroFecha();
+    const d = new Date(current + 'T12:00:00');
+    d.setDate(d.getDate() + days);
+    const dStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    this.cafeteria.setFiltroFecha(dStr);
+  }
+
+  buscarParaDespachar(): void {
+    const raw = this.busquedaDespacho.value?.trim();
+    if (!raw) { this.resultadoDespacho.set(null); return; }
+    const code = raw.toLowerCase();
+    const fecha = this.cafeteria.filtroFecha();
+    const all = this.cafeteria.confirmaciones();
+    const match = all.find(c => c.fecha === fecha && (c.codigo.trim().toLowerCase() === code || c.nombre.toLowerCase().includes(code)));
+    if (match) {
+      this.resultadoDespacho.set({ success: !match.entregado, message: match.entregado ? `Ya entregado a las ${match.horaEntrega}` : 'Listo para entregar', conf: match });
+    } else {
+      const padron = this.cafeteria.beneficiarios().find(b => b.codigo.trim().toLowerCase() === code || b.nombre.toLowerCase().includes(code));
+      if (padron) {
+        this.resultadoDespacho.set({ success: false, message: `${padron.nombre} está en padrón pero no confirmó para hoy.` });
+      } else {
+        this.resultadoDespacho.set({ success: false, message: `Código [${raw}] no encontrado.` });
+      }
+    }
+  }
+
+  entregarDesdeBusqueda(): void {
+    const res = this.resultadoDespacho();
+    if (res?.conf && !res.conf.entregado) {
+      this.cafeteria.toggleEntregado(res.conf.id);
+      this.resultadoDespacho.set({ success: true, message: `¡Entregado! ${res.conf.nombre}`, conf: { ...res.conf, entregado: true } });
+      this.busquedaDespacho.setValue('');
+    }
+  }
+
   onNoConfirmaronCarreraChange(e: Event): void {
     const val = (e.target as HTMLSelectElement).value;
     this.cafeteria.setFiltroNoConfirmaronCarrera(val);
   }
 
   onEntregaExcepcional(b: Beneficiario): void {
-    const tipo = this.cafeteria.filtroSubsidio() === 'Refrigerio' ? 'Refrigerio' : 'Almuerzo';
+    const filtro = this.cafeteria.filtroSubsidio();
+    const tipo = filtro === 'Refrigerio' ? 'Refrigerio' : filtro === 'Desayuno' ? 'Desayuno' : 'Almuerzo';
     if (confirm(`¿Registrar entrega excepcional de ${tipo} para ${b.nombre} (${b.codigo})?`)) {
       this.cafeteria.marcarEntregaExcepcional(b, tipo);
     }

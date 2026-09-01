@@ -793,7 +793,7 @@ export class GoogleForms implements OnInit {
   modalPegarOpen = signal<boolean>(false);
   modalScriptOpen = signal<boolean>(false);
   scriptCopied = signal<boolean>(false);
-  uploadSubsidio = signal<'Auto' | 'Almuerzo' | 'Refrigerio'>('Auto');
+  uploadSubsidio = signal<'Auto' | 'Almuerzo' | 'Refrigerio' | 'Desayuno'>('Auto');
   csvFeedback = signal<{ type: 'success' | 'error'; text: string } | null>(null);
   copyMessage = signal<string | null>(null);
 
