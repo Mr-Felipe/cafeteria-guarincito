@@ -531,14 +531,14 @@ export class Confirmados {
   buscarParaDespachar(): void {
     const raw = this.busquedaDespacho.value?.trim();
     if (!raw) { this.resultadoDespacho.set(null); return; }
-    const code = raw.toLowerCase();
+    const code = raw.toLowerCase().replace(/^0+/g, '');
     const fecha = this.cafeteria.filtroFecha();
     const all = this.cafeteria.confirmaciones();
-    const match = all.find(c => c.fecha === fecha && (c.codigo.trim().toLowerCase() === code || c.nombre.toLowerCase().includes(code)));
+    const match = all.find(c => c.fecha === fecha && (c.codigo.trim().toLowerCase().replace(/^0+/g, '') === code || c.nombre.toLowerCase().includes(code)));
     if (match) {
       this.resultadoDespacho.set({ success: !match.entregado, message: match.entregado ? `Ya entregado a las ${match.horaEntrega}` : 'Listo para entregar', conf: match });
     } else {
-      const padron = this.cafeteria.beneficiarios().find(b => b.codigo.trim().toLowerCase() === code || b.nombre.toLowerCase().includes(code));
+      const padron = this.cafeteria.beneficiarios().find(b => b.codigo.trim().toLowerCase().replace(/^0+/g, '') === code || b.nombre.toLowerCase().includes(code));
       if (padron) {
         this.resultadoDespacho.set({ success: false, message: `${padron.nombre} está en padrón pero no confirmó para hoy.` });
       } else {

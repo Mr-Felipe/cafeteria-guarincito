@@ -289,7 +289,7 @@ export class CafeteriaService {
       }
       // Búsqueda
       if (busqueda) {
-        const matchCode = c.codigo.toLowerCase().includes(busqueda);
+        const matchCode = this.normCode(c.codigo).includes(this.normCode(busqueda));
         const matchName = c.nombre.toLowerCase().includes(busqueda);
         const matchCarrera = c.carrera.toLowerCase().includes(busqueda);
         if (!matchCode && !matchName && !matchCarrera) return false;
@@ -626,7 +626,7 @@ export class CafeteriaService {
   private revalidateConfirmacionesWithPadron(): void {
     const padron = this.beneficiarios();
     const confs = this.confirmaciones().map(c => {
-      const match = padron.find(b => b.codigo.trim().toLowerCase() === c.codigo.trim().toLowerCase() && b.activo);
+      const match = padron.find(b => this.normCode(b.codigo) === this.normCode(c.codigo) && b.activo);
       if (match) {
         const difiere = this.verificarDiscrepanciaNombre(c.nombre, match.nombre);
         const carreraOk = match.carrera.toUpperCase().includes(c.carrera.toUpperCase()) || c.carrera.toUpperCase().includes(match.carrera.toUpperCase());
@@ -661,6 +661,10 @@ export class CafeteriaService {
     this.saveToStorage(STORAGE_KEYS.CONFIRMACIONES, confs);
   }
 
+  private normCode(raw: string): string {
+    return raw.trim().toLowerCase().replace(/^0+/g, '');
+  }
+
   private verificarDiscrepanciaNombre(nameForm: string, namePadron: string): boolean {
     const clean1 = nameForm.toUpperCase().replace(/[^A-Z]/g, '');
     const clean2 = namePadron.toUpperCase().replace(/[^A-Z]/g, '');
@@ -687,7 +691,7 @@ export class CafeteriaService {
     let errors = 0;
 
     const currentMap = new Map<string, Beneficiario>(
-      this.beneficiarios().map(b => [b.codigo.trim().toLowerCase(), b])
+      this.beneficiarios().map(b => [this.normCode(b.codigo), b])
     );
 
     // Detect delimiter: check header
@@ -791,7 +795,7 @@ export class CafeteriaService {
         }
       }
 
-      const key = codigo.toLowerCase();
+      const key = this.normCode(codigo);
       const existing = currentMap.get(key);
 
       const ben: Beneficiario = {
@@ -897,7 +901,7 @@ export class CafeteriaService {
         }
       }
 
-      const matchPadron = padron.find(b => b.codigo.trim().toLowerCase() === codigo.trim().toLowerCase() && b.activo);
+      const matchPadron = padron.find(b => this.normCode(b.codigo) === this.normCode(codigo) && b.activo);
       const isValido = !!matchPadron;
       const difiere = matchPadron ? this.verificarDiscrepanciaNombre(nombre, matchPadron.nombre) : false;
 
@@ -1178,7 +1182,7 @@ export class CafeteriaService {
         if (estado?.toUpperCase() !== 'ENTREGADO') continue;
         if (!fecha || !codigo) continue;
 
-        const key = `${fecha.trim()}-${codigo.trim().toLowerCase()}-${tipoSubsidio?.trim().toLowerCase()}`;
+        const key = `${fecha.trim()}-${this.normCode(codigo)}-${tipoSubsidio?.trim().toLowerCase()}`;
 
         const existingMatch = existing.find(c =>
           `${c.fecha}-${c.codigo.toLowerCase()}-${c.tipoSubsidio.toLowerCase()}` === key
@@ -1192,7 +1196,7 @@ export class CafeteriaService {
             marked++;
           }
         } else {
-          const padron = this.beneficiarios().find(b => b.codigo.trim().toLowerCase() === codigo.trim().toLowerCase());
+          const padron = this.beneficiarios().find(b => this.normCode(b.codigo) === this.normCode(codigo));
           const newConf: Confirmacion = {
             id: `conf-maestro-${codigo}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             timestamp: `${fecha} ${horaEntrega || ''}`.trim(),
