@@ -1016,11 +1016,6 @@ export class CafeteriaService {
           }
         }
 
-        // Live Simulation / Sample sync when using demo links or testing
-        const simulatedResult = this.simulateGoogleSheetSync(form);
-        totalNuevos += simulatedResult.nuevos;
-        this.updateFormLastSync(form.id, simulatedResult.nuevos);
-
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Error de conexión';
         errors.push(`${form.nombre}: ${message}`);
@@ -1061,47 +1056,6 @@ export class CafeteriaService {
     });
     this.formularios.set(updated);
     this.saveToStorage(STORAGE_KEYS.FORMULARIOS, updated);
-  }
-
-  private simulateGoogleSheetSync(form: FormularioConfig): { nuevos: number } {
-    // Generate a fresh confirmation from padrón if available to simulate incoming student
-    const padron = this.beneficiarios().filter(b => b.activo);
-    const fecha = this.filtroFecha();
-    const existingCodes = new Set(this.confirmaciones().map(c => `${c.fecha}-${c.codigo}`));
-
-    const available = padron.filter(b => {
-      if (form.tipo === 'Almuerzo' && b.subsidio !== 'Almuerzo' && b.subsidio !== 'Ambos') return false;
-      if (form.tipo === 'Refrigerio' && b.subsidio !== 'Refrigerio' && b.subsidio !== 'Ambos') return false;
-      return !existingCodes.has(`${fecha}-${b.codigo}`);
-    });
-
-    if (available.length > 0) {
-      const pick = available[0];
-      const now = new Date();
-    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-      const newConf: Confirmacion = {
-        id: `conf-live-${pick.codigo}-${Date.now()}`,
-        timestamp: `${fecha} ${timeStr}`,
-        fecha,
-        codigo: pick.codigo,
-        nombre: pick.nombre,
-        carrera: pick.carrera,
-        tipoSubsidio: form.tipo,
-        entregado: false,
-        esBeneficiarioValido: true,
-        beneficiarioPadron: pick,
-        difiereNombre: false,
-        origen: 'LiveSync'
-      };
-
-      const updated = [newConf, ...this.confirmaciones()];
-      this.confirmaciones.set(updated);
-      this.saveToStorage(STORAGE_KEYS.CONFIRMACIONES, updated);
-      return { nuevos: 1 };
-    }
-
-    return { nuevos: 0 };
   }
 
   guardarFormularioConfig(form: FormularioConfig): void {
