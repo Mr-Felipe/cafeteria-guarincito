@@ -451,6 +451,9 @@ export class Entregas {
     this.carreraControl.valueChanges.subscribe(val => {
       this.cafeteria.setFiltroCarrera(val || 'TODAS');
     });
+
+    // Sync entregas from Libro Maestro when page loads
+    setTimeout(() => this.cafeteria.sincronizarEntregasDesdeMaestro().catch(() => {}), 500);
   }
 
   readonly entregasFiltradas = computed(() => {

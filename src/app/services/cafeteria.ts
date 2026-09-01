@@ -164,6 +164,11 @@ export class CafeteriaService {
         this.sincronizarConGoogleSheets();
       }
     }, 60000); // 60 segundos para confirmaciones en tiempo real
+
+    // Refrescar entregas cada 5 minutos
+    setInterval(() => {
+      this.sincronizarEntregasDesdeMaestro().catch(() => {});
+    }, 300000);
   }
 
   private generateInitialConfirmations(bens: Beneficiario[]): Confirmacion[] {
@@ -946,10 +951,11 @@ export class CafeteriaService {
     this.isSyncing.set(true);
     this.lastSyncMessage.set(null);
 
-    const forms = this.formularios();
-    const targets = formId ? forms.filter(f => f.id === formId) : forms.filter(f => f.activo);
+    try {
+      const forms = this.formularios();
+      const targets = formId ? forms.filter(f => f.id === formId) : forms.filter(f => f.activo);
 
-    if (targets.length === 0) {
+      if (targets.length === 0) {
       this.isSyncing.set(false);
       const msg = { type: 'error' as const, text: 'No hay formularios configurados o activos para sincronizar.' };
       this.lastSyncMessage.set(msg);
@@ -990,6 +996,8 @@ export class CafeteriaService {
     this.isSyncing.set(false);
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+    this.isSyncing.set(false);
+
     if (errors.length > 0) {
       const msg = {
         type: 'error' as const,
@@ -1005,6 +1013,9 @@ export class CafeteriaService {
     };
     this.lastSyncMessage.set(msg);
     return { success: true, message: msg.text };
+    } finally {
+      this.isSyncing.set(false);
+    }
   }
 
   private updateFormLastSync(formId: string, count: number): void {
@@ -1149,7 +1160,7 @@ export class CafeteriaService {
     }
   }
 
-  private async sincronizarEntregasDesdeMaestro(): Promise<void> {
+  async sincronizarEntregasDesdeMaestro(): Promise<void> {
     try {
       const entregasUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_eD7coj74CyyYI6TUt68X1H-KaiQKc23VAW8ANvsCofp3TmYClguNGejpkhQyckEnbysM01viDjgE/pubhtml?gid=1988377971&single=true';
       const resp = await firstValueFrom(
@@ -1185,7 +1196,7 @@ export class CafeteriaService {
         const key = `${fecha.trim()}-${this.normCode(codigo)}-${tipoSubsidio?.trim().toLowerCase()}`;
 
         const existingMatch = existing.find(c =>
-          `${c.fecha}-${c.codigo.toLowerCase()}-${c.tipoSubsidio.toLowerCase()}` === key
+          `${c.fecha}-${this.normCode(c.codigo)}-${c.tipoSubsidio.toLowerCase()}` === key
         );
 
         if (existingMatch) {
